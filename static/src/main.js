@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import BootstrapVue from 'bootstrap-vue'
 import VueRouter from 'vue-router'
+import VueGoodTablePlugin from 'vue-good-table';
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -16,6 +17,7 @@ import Consultants from "./Components/Consultants";
 
 Vue.use(VueRouter)
 Vue.use(BootstrapVue)
+Vue.use(VueGoodTablePlugin)
 
 const routes = [
   { path: '/departments', component: Departments },

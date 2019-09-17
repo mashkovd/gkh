@@ -29,11 +29,11 @@ PATIENTS_FIELDS =\
 CONSULTANTS_FIELDS=\
 [
             dict(
-                key=f'{Consultants.__tablename__}_id',
+                key='value',
                 label='Id консультанта',
             ),
             dict(
-                key=f'{Consultants.__tablename__}_consultant_name',
+                key='text',
                 label='Фамилия',
                 sortable=True,
 
@@ -43,13 +43,12 @@ CONSULTANTS_FIELDS=\
 DEPARTMENTS_FIELDS =\
 [
             dict(
-                key=f'{Departments.__tablename__}_id',
+                key='value',
                 label='Id отделения',
             ),
             dict(
-                key=f'{Departments.__tablename__}_department_name',
+                key='text',
                 label='Название',
-                sortable=True,
 
             ),
         ]

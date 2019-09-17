@@ -2,6 +2,7 @@ from flask import Flask, jsonify, send_from_directory, make_response, request
 from flask_cors import CORS
 from flask.json import JSONEncoder
 from datetime import date
+import json
 from models import Session, Consultants, Patients, Departments, SickLists, Diagnoses, Reasons
 from settings import *
 from werkzeug.serving import run_simple
@@ -45,9 +46,9 @@ def static_dist(path):
 @app.route('/api/consultants')
 def consultants():
     session = Session()
-    res = session.execute(session.query(Consultants.id,
-                                        Consultants.consultant_name
-                                        )
+    res = session.execute(session.query(Consultants.id.label('value'),
+                                        Consultants.consultant_name.label('text')
+                                        ).order_by(Consultants.consultant_name)
                           ).fetchall()
     session.close()
     return jsonify({
@@ -70,7 +71,9 @@ def patients():
 @app.route('/api/departments')
 def departments():
     session = Session()
-    res = session.execute(session.query(Departments)).fetchall()
+    res = session.execute(session.query(Departments.id.label('value'),
+                                        Departments.department_name.label('text'),
+                                        ).order_by(Departments.department_name)).fetchall()
     session.close()
     return jsonify({
         'items': get_dict_from_cursor(res),
@@ -92,15 +95,39 @@ def diagnoses():
 @app.route('/api/sick_lists')
 def sick_lists():
     session = Session()
-    cur_page = int(request.args.get('currentPage'))
+    if request.args.get('currentPage') is None:
+        cur_page = 1
+    else:
+        cur_page = int(request.args.get('currentPage'))
     per_page = int(request.args.get('perPage'))
 
-    res = session.execute(session.query(SickLists, Patients, Departments, Diagnoses, Reasons, Consultants). \
-                          join(Consultants). \
-                          join(Patients). \
-                          join(Departments). \
-                          join(Diagnoses). \
-                          join(Reasons).options()).fetchall()
+    number, correction, consultants, departments, diagnoses = None, None, None, None, None
+    if request.args.get('filter'):
+        correction = json.loads(request.args.get('filter')).get('correction')
+        number = json.loads(request.args.get('filter')).get('number')
+        consultant = json.loads(request.args.get('filter')).get('consultant')
+        department = json.loads(request.args.get('filter')).get('department')
+        diagnose = json.loads(request.args.get('filter')).get('diagnose')
+
+    s = session.query(SickLists, Patients, Departments, Diagnoses, Reasons, Consultants). \
+        join(Consultants). \
+        join(Patients). \
+        join(Departments). \
+        join(Diagnoses). \
+        join(Reasons).options()
+
+    if number is not None:
+        s = s.filter(SickLists.number_of_consultation == int(number))
+    if correction is not None:
+        s = s.filter(SickLists.correction == int(correction))
+    if consultant is not None:
+        s = s.filter(SickLists.consultant_id == int(consultant))
+    if department is not None:
+        s = s.filter(SickLists.department_id == int(department))
+    if diagnose is not None:
+        s = s.filter(Diagnoses.diagnose_name.like(f"%{diagnose}%"))
+
+    res = session.execute(s).fetchall()
     total_rows = len(res)
     res = res[(cur_page - 1) * per_page: cur_page * per_page]
     session.close()
