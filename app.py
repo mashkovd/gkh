@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, send_from_directory, make_response, request
+from flask import Flask, jsonify, send_from_directory, Response, request
 from flask_cors import CORS
 from flask.json import JSONEncoder
 from datetime import date
 import json
-from models import Session, Consultants, Patients, Departments, SickLists, Diagnoses, Reasons
+from flask_basicauth import BasicAuth
+from datetime import datetime
 from settings import *
 from werkzeug.serving import run_simple
 
@@ -26,8 +27,13 @@ app = Flask(__name__, static_folder='static/')
 app.config['JSON_AS_ASCII'] = False
 app.json_encoder = CustomJSONEncoder
 CORS(app)
+basic_auth = BasicAuth(app)
+app.config['BASIC_AUTH_USERNAME'] = 'test'
+app.config['BASIC_AUTH_PASSWORD'] = 'test'
+app.config['BASIC_AUTH_FORCE'] = True
 
 
+# @basic_auth.required
 @app.route('/')
 def index():
     return app.send_static_file("index.html")
@@ -39,7 +45,6 @@ def get_dict_from_cursor(res):
 
 @app.route('/<path:path>')
 def static_dist(path):
-    # тут пробрасываем статику
     return send_from_directory("static/dist", path)
 
 
@@ -57,15 +62,26 @@ def consultants():
     })
 
 
-@app.route('/api/patients')
+@app.route('/api/patients', methods=['GET', 'POST'])
 def patients():
     session = Session()
-    res = session.execute(session.query(Patients)).fetchall()
-    session.close()
-    return jsonify({
-        'items': get_dict_from_cursor(res),
-        'fields': PATIENTS_FIELDS
-    })
+    if request.method == 'GET':
+        res = session.execute(session.query(Patients.id.label('value'),
+                                            Patients.patient_sur_name.label('text'),
+                                            Patients.patient_age,
+                                            ).order_by(Patients.patient_sur_name)).fetchall()
+        session.close()
+
+        return jsonify({
+            'items': get_dict_from_cursor(res),
+            'fields': PATIENTS_FIELDS
+        })
+    elif request.method == 'POST':
+        session.add(Patients(**request.json))
+        session.commit()
+        # TODO Переписать этот говнокод
+        session.close()
+        return Response({'result': 'Ok'}, 200)
 
 
 @app.route('/api/departments')
@@ -84,7 +100,9 @@ def departments():
 @app.route('/api/diagnoses')
 def diagnoses():
     session = Session()
-    res = session.execute(session.query(Diagnoses)).fetchall()
+    res = session.execute(session.query(Diagnoses.id.label('value'),
+                                        Diagnoses.diagnose_name.label('text'),
+                                        ).order_by(Diagnoses.diagnose_name)).fetchall()
     session.close()
     return jsonify({
         'items': get_dict_from_cursor(res),
@@ -92,50 +110,95 @@ def diagnoses():
     })
 
 
-@app.route('/api/sick_lists')
+@app.route('/api/sick_lists', methods=['GET', 'POST', 'DELETE'])
 def sick_lists():
     session = Session()
-    if request.args.get('currentPage') is None:
-        cur_page = 1
-    else:
-        cur_page = int(request.args.get('currentPage'))
-    per_page = int(request.args.get('perPage'))
+    if request.method == 'GET':
 
-    number, correction, consultants, departments, diagnoses = None, None, None, None, None
-    if request.args.get('filter'):
-        correction = json.loads(request.args.get('filter')).get('correction')
-        number = json.loads(request.args.get('filter')).get('number')
-        consultant = json.loads(request.args.get('filter')).get('consultant')
-        department = json.loads(request.args.get('filter')).get('department')
-        diagnose = json.loads(request.args.get('filter')).get('diagnose')
+        if request.args.get('currentPage') is None:
+            cur_page = 1
+        else:
+            cur_page = int(request.args.get('currentPage'))
+        per_page = int(request.args.get('perPage'))
 
-    s = session.query(SickLists, Patients, Departments, Diagnoses, Reasons, Consultants). \
-        join(Consultants). \
-        join(Patients). \
-        join(Departments). \
-        join(Diagnoses). \
-        join(Reasons).options()
+        number, correction, consultant, department, diagnose = None, None, None, None, None
+        if request.args.get('filter'):
+            correction = json.loads(request.args.get('filter')).get('correction')
+            number = json.loads(request.args.get('filter')).get('number')
+            consultant = json.loads(request.args.get('filter')).get('consultant')
+            department = json.loads(request.args.get('filter')).get('department')
+            diagnose = json.loads(request.args.get('filter')).get('diagnose')
 
-    if number is not None:
-        s = s.filter(SickLists.number_of_consultation == int(number))
-    if correction is not None:
-        s = s.filter(SickLists.correction == int(correction))
-    if consultant is not None:
-        s = s.filter(SickLists.consultant_id == int(consultant))
-    if department is not None:
-        s = s.filter(SickLists.department_id == int(department))
-    if diagnose is not None:
-        s = s.filter(Diagnoses.diagnose_name.like(f"%{diagnose}%"))
+        s = session.query(SickLists.id,
+                          SickLists.sl_date,
+                          SickLists.consultant_id,
+                          Consultants.consultant_name,
+                          SickLists.number_of_sl,
+                          SickLists.number_of_consultation,
+                          SickLists.patient_id,
+                          Patients.patient_age,
+                          Patients.patient_sur_name,
+                          SickLists.correction,
+                          SickLists.department_id,
+                          Departments.department_name,
+                          SickLists.diagnose_id,
+                          Diagnoses.diagnose_name,
+                          SickLists.reason_id,
+                          Reasons.reason_name,
+                          SickLists.comment,
+                          ). \
+            join(Consultants). \
+            join(Patients). \
+            join(Departments). \
+            join(Diagnoses). \
+            join(Reasons).options()
 
-    res = session.execute(s).fetchall()
-    total_rows = len(res)
-    res = res[(cur_page - 1) * per_page: cur_page * per_page]
-    session.close()
-    return jsonify({
-        'items': get_dict_from_cursor(res),
-        'fields': SICKLIST_FIELDS,
-        'totalRows': total_rows
-    })
+        if number is not None:
+            s = s.filter(SickLists.number_of_consultation == int(number))
+        if correction is not None:
+            s = s.filter(SickLists.correction == int(correction))
+        if consultant is not None:
+            s = s.filter(SickLists.consultant_id == int(consultant))
+        if department is not None:
+            s = s.filter(SickLists.department_id == int(department))
+        if diagnose is not None:
+            s = s.filter(Diagnoses.diagnose_name.like(f"%{diagnose}%"))
+
+        res = session.execute(s).fetchall()
+        total_rows = len(res)
+        res = res[(cur_page - 1) * per_page: cur_page * per_page]
+        session.close()
+        return jsonify({
+            'items': get_dict_from_cursor(res),
+            'fields': SICKLIST_FIELDS,
+            'totalRows': total_rows
+        })
+    elif request.method == 'POST':
+        data = request.json
+        # TODO Переписать этот говнокод
+        column_names = SickLists.__table__.columns.keys()
+        record = {}
+        for key in column_names:
+            value = data.get(f'{SickLists.__tablename__}_{key}')
+            if value:
+                record.update({key: value})
+        record.update(sl_date=datetime.strptime(record.get('sl_date'), "%Y-%m-%d").date())
+        record.pop('id')
+        session.add(SickLists(**record))
+        session.commit()
+        # TODO Переписать этот говнокод
+        session.close()
+        return Response({'result': 'Ok'}, 200)
+    elif request.method == 'DELETE':
+        session.query(SickLists).filter(SickLists.id == request.json.get('id')).delete()
+        session.commit()
+        session.close()
+        return Response({'result': 'Ok'}, 200)
+    elif request.method == 'PUT':
+
+        session.commit()
+        session.close()
+        return Response({'result': 'Ok'}, 200)
 
 
 if __name__ == '__main__':
@@ -143,4 +206,5 @@ if __name__ == '__main__':
                port=5000,
                application=app,
                use_reloader=True,
-               use_debugger=True)
+               use_debugger=True
+               )

@@ -2,7 +2,14 @@ import Vue from 'vue'
 import App from './App.vue'
 import BootstrapVue from 'bootstrap-vue'
 import VueRouter from 'vue-router'
-import VueGoodTablePlugin from 'vue-good-table';
+
+import {library} from '@fortawesome/fontawesome-svg-core'
+import {faClone, faMinus} from '@fortawesome/free-solid-svg-icons'
+import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
+
+library.add(faClone, faMinus);
+Vue.component('font-awesome-icon', FontAwesomeIcon);
+
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -17,22 +24,22 @@ import Consultants from "./Components/Consultants";
 
 Vue.use(VueRouter)
 Vue.use(BootstrapVue)
-Vue.use(VueGoodTablePlugin)
+
 
 const routes = [
-  { path: '/departments', component: Departments },
-  { path: '/diagnoses', component: Diagnoses },
-  { path: '/patients', component: Patients },
-  { path: '/consultants', component: Consultants },
-  { path: '/sick_lists', component: SickLists },
-  { path: '/main', component: Main },
-  { path: '/login', component: Login }
+  {path: '/departments', component: Departments},
+  {path: '/diagnoses', component: Diagnoses},
+  {path: '/patients', component: Patients},
+  {path: '/consultants', component: Consultants},
+  {path: '/sick_lists', component: SickLists},
+  {path: '/main', component: Main},
+  {path: '/login', component: Login}
 ]
 
 
 const router = new VueRouter({
   routes, // сокращённая запись для `routes: routes`
-   mode: 'history'
+  mode: 'history'
 })
 
 

@@ -72,12 +72,10 @@
     }
 </script>
 
-<style>
-  #app {
-    max-height: 100vh;
-    max-width: 100vw;
-  }
-  .navbar {
-    height: 10vh;
-  }
-</style>
+<!--<style>-->
+<!--  #app {-->
+<!--    max-height: 100vh;-->
+<!--    max-width: 100vw;-->
+<!--  }-->
+
+<!--</style>-->

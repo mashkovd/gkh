@@ -1,6 +1,7 @@
 <template>
   <div>
     <b-container fluid>
+
       <b-row>
         <b-col sm="1" md="6" class="my-1">
           <b-form-group
@@ -19,7 +20,7 @@
           </b-form-group>
 
         </b-col>
-                <b-col sm="1" md="6" class="my-1">
+        <b-col sm="1" md="6" class="my-1">
           <b-form-group
             label="Всего записей"
             label-cols-sm="4"
@@ -34,7 +35,6 @@
         </b-col>
 
 
-
       </b-row>
 
       <b-form-group
@@ -43,18 +43,20 @@
         class="mb-0"
       >
         <b-row>
-                    <b-col sm="1" md="4" class="my-1">
+          <b-col sm="1" md="4" class="my-1">
             <b-form-group
               label-cols-lg="3"
               label="Консультант"
               label-size="sm"
 
-              label-for="select_correction"
+              label-for="select_consultant"
             >
 
-              <b-form-select id="select_consultant" v-model="filter.consultant" :options="consultants_options"
+              <b-form-select
+                id="select_consultant"
+                v-model="filter.consultant"
+                :options="consultants_options">
 
-              >
                 <template v-slot:first>
                   <option :value="null">-- Укажите консультанта --</option>
                 </template>
@@ -69,7 +71,7 @@
               label="№"
               label-size="sm"
 
-              label-for="select_correction"
+              label-for="select_number"
             >
               <b-form-select id="select_number" v-model="filter.number" :options="number_options">
                 <template v-slot:first>
@@ -134,7 +136,6 @@
       </b-form-group>
 
 
-
       <b-pagination
         v-model="currentPage"
         :total-rows="totalRows"
@@ -143,6 +144,8 @@
         size="sm"
         class="my-0"
       ></b-pagination>
+
+
       <b-table
         id="sick_list_table"
         ref="table"
@@ -153,7 +156,7 @@
         :sort-desc.sync="sortDesc"
         :sort-direction="sortDirection"
         @filtered="onFiltered"
-        filter-debounce="150"
+
         style="width: 100%"
 
 
@@ -166,9 +169,171 @@
         head-variant="light"
 
       >
+        <template v-slot:table-busy>
+          <div class="d-flex justify-content-center mb-3">
+            <b-spinner label="Loading..." class="align-middle"></b-spinner>
+          </div>
+        </template>
+
+
+        <template v-slot:cell(actions)="row">
+          <b-button variant="primary" size="sm" class="mr-2" @click="set_current_row(row)" v-b-modal.sicklist-modal>
+            <font-awesome-icon icon="clone"/>
+          </b-button>
+          <b-button variant="primary" size="sm" class="mr-2" @click="del_current_row(row)">
+            <font-awesome-icon icon="minus"/>
+          </b-button>
+
+
+        </template>
 
 
       </b-table>
+
+      <b-modal ref="addSickList"
+               id="sicklist-modal"
+               title="Новая запись"
+               hide-footer
+      >
+        <b-form class="w-100" @submit="onSubmit">
+
+          <b-form-group
+            label="Дата консультации:"
+            label-cols-sm="8"
+            label-cols-lg="4"
+            label-for="sl_date">
+            <b-form-input
+              id="sl_date"
+              type="date"
+              v-model="form_data.sick_lists_sl_date"
+
+              required
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            label="Консультант:"
+            label-cols-sm="8"
+            label-cols-lg="4"
+            label-for="consultant_id">
+            <b-form-select
+              id="consultant_id"
+              ref="consultant_select"
+              :options="consultants_options"
+              v-model="form_data.sick_lists_consultant_id"
+              required
+
+            ></b-form-select>
+          </b-form-group>
+
+          <b-form-group
+            label="Номер больничного листа:"
+            label-cols-sm="8"
+            label-cols-lg="6"
+            label-for="number_of_sl">
+            <b-form-input
+              id="number_of_sl"
+              type="number"
+              v-model="form_data.sick_lists_number_of_sl"
+              required></b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            label="Номер консультации:"
+            label-cols-sm="8"
+            label-cols-lg="6"
+            label-for="number_of_consultation">
+            <b-form-input
+              id="number_of_consultation"
+              type="number"
+              v-model="form_data.sick_lists_number_of_consultation"
+              required
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            label="Пациент:"
+            label-cols-sm="8"
+            label-cols-lg="4"
+            label-for="patient_id">
+            <b-form-select
+              id="patient_id"
+              :options="patients_options"
+              v-model="form_data.sick_lists_patient_id"
+              required
+              autocomplete="on"
+            ></b-form-select>
+          </b-form-group>
+
+          <b-form-group
+            label="Коррекция:"
+            label-cols-sm="8"
+            label-cols-lg="4"
+            label-for="correction">
+            <b-form-select
+              id="correction"
+              :options="correction_options"
+              v-model="form_data.sick_lists_correction"
+              required></b-form-select>
+          </b-form-group>
+
+          <b-form-group
+            label="Отделение:"
+            label-cols-sm="8"
+            label-cols-lg="4"
+            label-for="department_id"
+          >
+            <b-form-select
+              id="department_id"
+              :options="departments_options"
+              v-model="form_data.sick_lists_department_id"
+              required>
+
+            </b-form-select>
+          </b-form-group>
+
+          <b-form-group
+            label="Диагноз:"
+            label-cols-sm="8"
+            label-cols-lg="4"
+            label-for="diagnose_id">
+            <b-form-select
+              id="diagnose_id"
+              :options="diagnoses_options"
+              v-model="form_data.sick_lists_diagnose_id"
+              required>
+
+            </b-form-select>
+          </b-form-group>
+
+          <b-form-group
+            label="Причина:"
+            label-cols-sm="8"
+            label-cols-lg="4"
+            label-for="reason_id">
+            <b-form-select
+              id="reason_id"
+              :options="diagnoses_options"
+              v-model="form_data.sick_lists_reason_id"
+              required>
+
+            </b-form-select>
+          </b-form-group>
+
+          <b-form-textarea
+            size="sm"
+            placeholder="Комментарий"
+          >
+            <b-form-input id="comment"></b-form-input>
+          </b-form-textarea>
+          <b-form-group class="text-center"
+                        label-cols-sm="10">
+            <b-button type="submit" variant="primary" class="text-center">Добавить</b-button>
+            <!--          <b-button type="reset" variant="danger">Сброс</b-button>-->
+          </b-form-group>
+        </b-form>
+      </b-modal>
+
 
     </b-container>
   </div>
@@ -210,11 +375,41 @@
                 ],
                 consultants_options: [],
                 departments_options: [],
+                patients_options: [],
+                diagnoses_options: [],
+                reasons_options: [],
+                current_row: {},
+                form_data: {
+                    "sl_date": null,
+                    "consultant_id": null,
+                    "number_of_sl": null,
+                    "number_of_consultation": null,
+                    "patient_id": null,
+                    "correction": null,
+                    "department_id": null,
+                    "diagnose_id": null,
+                    "reason_id": null,
+                },
 
             }
         },
 
         methods: {
+            del_current_row(row) {
+                let promise = axios.delete('/api/sick_lists', {data: {id: row.item.sick_lists_id}}
+                )
+
+                return promise.then((data) => {
+                    this.$refs.table.refresh()
+
+                }).catch(error => {
+                    return []
+                })
+
+            },
+            set_current_row(row) {
+                this.form_data = row.item
+            },
             myProvider(ctx) {
                 let promise = axios.get('/api/sick_lists',
                     {
@@ -234,23 +429,47 @@
                     return []
                 })
             },
+
             sortingChanged(ctx) {
-                debugger;
             },
+
             getData() {
                 axios.get('/api/consultants')
                     .then(response => {
                         this.consultants_options = response.data.items
                     })
-                    .catch(error => console.log(error))
+                    .catch(error => console.log(error));
+
                 axios.get('/api/departments')
                     .then(response => {
                         this.departments_options = response.data.items
                     })
-                    .catch(error => console.log(error))
+                    .catch(error => console.log(error));
 
+                axios.get('/api/patients')
+                    .then(response => {
+                        this.patients_options = response.data.items
+                    })
+                    .catch(error => console.log(error));
+                axios.get('/api/diagnoses')
+                    .then(response => {
+                        this.diagnoses_options = response.data.items
+                        this.reasons_options = response.data.items
+                    })
+                    .catch(error => console.log(error));
             },
 
+            onSubmit(evt) {
+                evt.preventDefault();
+                this.$refs.addSickList.hide();
+                let promise = axios.post('/api/sick_lists', this.form_data)
+                this.$refs.table.refresh()
+                return promise.then((data) => {
+
+                }).catch(error => {
+                    return []
+                })
+            },
             onFiltered(filteredItems) {
                 // Trigger pagination to update the number of buttons/pages due to filtering
                 //this.$refs.table.refresh()
@@ -277,7 +496,7 @@
         computed: {
             // consultant_options: function ()
             // {
-            //     debugger
+            //
             //
             // }
 
