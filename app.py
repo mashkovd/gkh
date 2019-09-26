@@ -110,20 +110,80 @@ def diagnoses():
     })
 
 
+@app.route('/api/csv')
+def csv():
+    session = Session()
+    number, correction, consultant, department, diagnose = None, None, None, None, None
+    patient, select_date = None, None
+
+    if request.args.get('filter'):
+        correction = json.loads(request.args.get('filter')).get('correction')
+        number = json.loads(request.args.get('filter')).get('number')
+        consultant = json.loads(request.args.get('filter')).get('consultant')
+        department = json.loads(request.args.get('filter')).get('department')
+        diagnose = json.loads(request.args.get('filter')).get('diagnose')
+        patient = json.loads(request.args.get('filter')).get('patient')
+        select_date = json.loads(request.args.get('filter')).get('select_date')
+
+    s = session.query(SickLists.id,
+                      SickLists.sl_date,
+                      Consultants.consultant_name,
+                      SickLists.number_of_sl,
+                      SickLists.number_of_consultation,
+                      Patients.patient_age,
+                      Patients.patient_sur_name,
+                      SickLists.correction,
+                      Departments.department_name,
+                      Diagnoses.diagnose_name,
+                      Reasons.reason_name,
+                      SickLists.comment,
+                      ). \
+        join(Consultants). \
+        join(Patients). \
+        join(Departments). \
+        join(Diagnoses). \
+        join(Reasons)
+
+    if number is not None:
+        s = s.filter(SickLists.number_of_consultation == int(number))
+    if correction is not None:
+        s = s.filter(SickLists.correction == int(correction))
+    if consultant is not None:
+        s = s.filter(SickLists.consultant_id == int(consultant))
+    if department is not None:
+        s = s.filter(SickLists.department_id == int(department))
+    if diagnose is not None:
+        s = s.filter(Diagnoses.diagnose_name.like(f"%{diagnose}%"))
+    if patient is not None:
+        s = s.filter(Patients.patient_sur_name.like(f"{patient}%"))
+    if select_date is not None and select_date != '':
+        s = s.filter(SickLists.sl_date == select_date)
+    res = session.execute(s).fetchall()
+
+    session.close()
+    csv_data = f'{";".join([item.get("label") for item in SICKLIST_FIELDS])}\n'
+    for record in get_dict_from_cursor(res):
+        csv_data = f'{csv_data}{";".join(f"{item}" for item in record.values())}\n'
+    return jsonify({
+        'csv_data': csv_data,
+    })
+
+
 @app.route('/api/sick_lists', methods=['GET', 'POST', 'DELETE'])
 def sick_lists():
-    session = Session()
     if request.method == 'GET':
 
-        if request.args.get('currentPage') is None:
-            cur_page = 1
-        else:
+        if request.args.get('currentPage') is not None:
             cur_page = int(request.args.get('currentPage'))
+        else:
+            cur_page = 1
+
         per_page = None
         if request.args.get('perPage') is not None:
             per_page = int(request.args.get('perPage'))
 
-        number, correction, consultant, department, diagnose = None, None, None, None, None
+        number, correction, consultant, department, diagnose, patient, select_date = None, None, None, None, \
+                                                                                     None, None, None
         if request.args.get('filter'):
             correction = json.loads(request.args.get('filter')).get('correction')
             number = json.loads(request.args.get('filter')).get('number')
@@ -132,7 +192,7 @@ def sick_lists():
             diagnose = json.loads(request.args.get('filter')).get('diagnose')
             patient = json.loads(request.args.get('filter')).get('patient')
             select_date = json.loads(request.args.get('filter')).get('select_date')
-
+        session = Session()
         s = session.query(SickLists.id,
                           SickLists.sl_date,
                           SickLists.consultant_id,
@@ -155,7 +215,7 @@ def sick_lists():
             join(Patients). \
             join(Departments). \
             join(Diagnoses). \
-            join(Reasons).options()
+            join(Reasons)
 
         if number is not None:
             s = s.filter(SickLists.number_of_consultation == int(number))
@@ -168,8 +228,8 @@ def sick_lists():
         if diagnose is not None:
             s = s.filter(Diagnoses.diagnose_name.like(f"%{diagnose}%"))
         if patient is not None:
-            s = s.filter(Patients.patient_sur_name.like(f"%{patient}%"))
-        if select_date is not None and select_date !='':
+            s = s.filter(Patients.patient_sur_name.like(f"{patient}%"))
+        if select_date is not None and select_date != '':
             s = s.filter(SickLists.sl_date == select_date)
         res = session.execute(s).fetchall()
         total_rows = len(res)
@@ -182,6 +242,7 @@ def sick_lists():
             'totalRows': total_rows
         })
     elif request.method == 'POST':
+        session = Session()
         data = request.json
         # TODO Переписать этот говнокод
         column_names = SickLists.__table__.columns.keys()
@@ -198,12 +259,8 @@ def sick_lists():
         session.close()
         return Response({'result': 'Ok'}, 200)
     elif request.method == 'DELETE':
+        session = Session()
         session.query(SickLists).filter(SickLists.id == request.json.get('id')).delete()
-        session.commit()
-        session.close()
-        return Response({'result': 'Ok'}, 200)
-    elif request.method == 'PUT':
-
         session.commit()
         session.close()
         return Response({'result': 'Ok'}, 200)

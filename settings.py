@@ -71,7 +71,7 @@ SICKLIST_FIELDS = \
         ),
         dict(
             key=f'{SickLists.__tablename__}_sl_date',
-            label='   Дата   ',
+            label='Дата',
             
 
         ),
@@ -83,7 +83,7 @@ SICKLIST_FIELDS = \
         ),
         dict(
             key=f'{SickLists.__tablename__}_number_of_sl',
-            label='#',
+            label='Номер',
             
 
         ),

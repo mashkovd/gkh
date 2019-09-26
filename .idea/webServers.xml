@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="04aecf34-dfa8-43a3-a4f6-b5edf6609011" name="scaleway-frappe-dev" url="http://51.158.119.198">
+        <fileTransfer host="51.158.119.198" port="22" privateKey="C:\Users\Mashk\mashkovd.ppk" accessType="SFTP" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+      <webServer id="89f4562e-9062-41d5-8b3d-5b6ccb93029a" name="hetzner" url="http://95.217.16.95">
+        <fileTransfer host="95.217.16.95" port="22" privateKey="C:\Users\Mashk\mashkovd.ppk" accessType="SFTP" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+      <webServer id="ffeaa3d9-03b9-4064-bfe5-af25b6faf679" name="huawei" url="http://192.168.1.155">
+        <fileTransfer host="192.168.1.155" port="2222" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="2222" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

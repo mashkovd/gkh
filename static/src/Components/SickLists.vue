@@ -542,24 +542,16 @@
             },
             get_csv() {
 
-                axios.get('/api/sick_lists',
+                axios.get('/api/csv',
                     {
                         params: {
-                            perPage: null,
-                            currentPage: null,
                             filter: this.filter,
                         }
                     }
                 )
                     .then(response => {
-                        let items = response.data.items;
                         let csvContent = "data:text/csv;charset=utf-8,";
-                        csvContent += [
-                            Object.keys(items[0]).join(";"),
-                            ...items.map(item => Object.values(item).join(";"))
-                        ]
-                            .join("\n")
-                            .replace(/(^\[)|(\]$)/gm, "");
+                        csvContent += response.data.csv_data
 
                         const data = encodeURI(csvContent);
                         const link = document.createElement("a");
