@@ -32,6 +32,6 @@ npm i --save @fortawesome/vue-fontawesome
 gunicorn --bind 0.0.0.0:5000 wsgi:app --workers=2 
 
 gunicorn -w 2 -b 0.0.0.0:5000 --chdir /opt/share/nginx/gkh2.0 wsgi:app --reload --timeout 900
-gunicorn -w 3  -b 0.0.0.0:5000 --chdir /opt/share/nginx/gkh2.0 wsgi:app --reload --timeout 5000
+gunicorn -w 2 -b 0.0.0.0:5000 --chdir /opt/share/nginx/gkh2.0 wsgi:app --reload --timeout 5000
 cd /opt/share/nginx/gkh2.0
 

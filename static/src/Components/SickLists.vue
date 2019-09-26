@@ -19,11 +19,14 @@
             ></b-form-select>
           </b-form-group>
 
+
         </b-col>
-        <b-col sm="1" md="6" class="my-1">
+
+
+        <b-col sm="1" md="3" class="my-1">
           <b-form-group
             label="Всего записей"
-            label-cols-sm="4"
+            label-cols-sm="3"
             label-size="sm"
             label-for="perPageSelect"
             class="mb-0"
@@ -43,7 +46,7 @@
         class="mb-0"
       >
         <b-row>
-          <b-col sm="1" md="4" class="my-1">
+          <b-col sm="1" md="3" class="my-1">
             <b-form-group
               label-cols-lg="3"
               label="Консультант"
@@ -64,8 +67,58 @@
 
             </b-form-group>
           </b-col>
+          <b-col sm="1" md="3" class="my-1">
+            <b-form-group
+              label-cols-lg="3"
+              label="Отделение"
+              label-size="sm"
 
-          <b-col sm="5" md="4" class="my-1">
+              label-for="select_department"
+            >
+              <b-form-select id="select_department" v-model="filter.department" :options="departments_options">
+                <template v-slot:first>
+                  <option :value="null">-- Укажите отделение --</option>
+                </template>
+              </b-form-select>
+
+            </b-form-group>
+          </b-col>
+
+          <b-col sm="1" md="3" class="my-1">
+            <b-form-group
+              label-cols-lg="3"
+              label="Пациент"
+              label-size="sm"
+
+              label-for="select_patient"
+            >
+              <b-form-input id="select_patient" v-model="filter.patient">
+                <template v-slot:first>
+                  <option :value="null">-- Укажите пациента --</option>
+                </template>
+              </b-form-input>
+
+            </b-form-group>
+          </b-col>
+
+          <b-col sm="1" md="3" class="my-1">
+            <b-form-group
+              label-cols-lg="3"
+              label="Дата"
+              label-size="sm"
+
+              label-for="select_date"
+            >
+              <b-form-input type="date" id="select_date" v-model="filter.select_date">
+                <template v-slot:first>
+                  <option :value="null">-- Укажите дату --</option>
+                </template>
+              </b-form-input>
+
+            </b-form-group>
+          </b-col>
+
+          <b-col sm="1" md="3" class="my-1">
             <b-form-group
               label-cols-sm="1"
               label="№"
@@ -82,7 +135,7 @@
             </b-form-group>
           </b-col>
 
-          <b-col sm="1" md="4" class="my-1">
+          <b-col sm="1" md="3" class="my-1">
             <b-form-group
               label-cols-lg="3"
               label="Коррекция"
@@ -99,23 +152,8 @@
 
             </b-form-group>
           </b-col>
-          <b-col sm="1" md="4" class="my-1">
-            <b-form-group
-              label-cols-lg="3"
-              label="Отделение"
-              label-size="sm"
 
-              label-for="select_department"
-            >
-              <b-form-select id="select_department" v-model="filter.department" :options="departments_options">
-                <template v-slot:first>
-                  <option :value="null">-- Укажите отделение --</option>
-                </template>
-              </b-form-select>
-
-            </b-form-group>
-          </b-col>
-          <b-col sm="1" md="4" class="my-1">
+          <b-col sm="1" md="3" class="my-1">
             <b-form-group
               label-cols-lg="3"
               label="Диагноз"
@@ -129,6 +167,14 @@
                 </template>
               </b-form-input>
 
+            </b-form-group>
+          </b-col>
+          <b-col sm="1" md="3" class="my-1">
+            <b-form-group class="text-right"
+            >
+              <b-button variant="primary" size="sm" class="mr-2 text-center" @click="get_csv">
+                Выгрузить в csv
+              </b-button>
             </b-form-group>
           </b-col>
 
@@ -360,6 +406,8 @@
                     consultant: null,
                     diagnose: null,
                     department: null,
+                    patient: null,
+                    select_date: null,
 
                 },
                 filterOn: [],
@@ -491,6 +539,37 @@
                 // }),
                 //
                 //     this.currentPage = 1
+            },
+            get_csv() {
+
+                axios.get('/api/sick_lists',
+                    {
+                        params: {
+                            perPage: null,
+                            currentPage: null,
+                            filter: this.filter,
+                        }
+                    }
+                )
+                    .then(response => {
+                        let items = response.data.items;
+                        let csvContent = "data:text/csv;charset=utf-8,";
+                        csvContent += [
+                            Object.keys(items[0]).join(";"),
+                            ...items.map(item => Object.values(item).join(";"))
+                        ]
+                            .join("\n")
+                            .replace(/(^\[)|(\]$)/gm, "");
+
+                        const data = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", data);
+                        link.setAttribute("download", "export.csv");
+                        link.click();
+                    })
+                    .catch(error => console.log(error));
+
+
             }
         },
         computed: {

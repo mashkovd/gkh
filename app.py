@@ -119,7 +119,9 @@ def sick_lists():
             cur_page = 1
         else:
             cur_page = int(request.args.get('currentPage'))
-        per_page = int(request.args.get('perPage'))
+        per_page = None
+        if request.args.get('perPage') is not None:
+            per_page = int(request.args.get('perPage'))
 
         number, correction, consultant, department, diagnose = None, None, None, None, None
         if request.args.get('filter'):
@@ -128,6 +130,8 @@ def sick_lists():
             consultant = json.loads(request.args.get('filter')).get('consultant')
             department = json.loads(request.args.get('filter')).get('department')
             diagnose = json.loads(request.args.get('filter')).get('diagnose')
+            patient = json.loads(request.args.get('filter')).get('patient')
+            select_date = json.loads(request.args.get('filter')).get('select_date')
 
         s = session.query(SickLists.id,
                           SickLists.sl_date,
@@ -163,10 +167,14 @@ def sick_lists():
             s = s.filter(SickLists.department_id == int(department))
         if diagnose is not None:
             s = s.filter(Diagnoses.diagnose_name.like(f"%{diagnose}%"))
-
+        if patient is not None:
+            s = s.filter(Patients.patient_sur_name.like(f"%{patient}%"))
+        if select_date is not None and select_date !='':
+            s = s.filter(SickLists.sl_date == select_date)
         res = session.execute(s).fetchall()
         total_rows = len(res)
-        res = res[(cur_page - 1) * per_page: cur_page * per_page]
+        if cur_page is not None and per_page is not None:
+            res = res[(cur_page - 1) * per_page: cur_page * per_page]
         session.close()
         return jsonify({
             'items': get_dict_from_cursor(res),
