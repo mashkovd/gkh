@@ -1,5 +1,7 @@
 from models import *
 
+date_format = "%Y-%m-%d"
+
 PATIENTS_FIELDS = \
     [
         dict(

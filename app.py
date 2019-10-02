@@ -14,7 +14,7 @@ class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         try:
             if isinstance(obj, date):
-                return obj.isoformat()
+                return obj.strftime(date_format)
             iterable = iter(obj)
         except TypeError:
             pass
@@ -158,7 +158,7 @@ def csv():
         s = s.filter(Patients.patient_sur_name.like(f"{patient}%"))
     if select_date is not None and select_date != '':
         s = s.filter(SickLists.sl_date == select_date)
-    res = session.execute(s).fetchall()
+    res = session.execute(s.order_by(desc(SickLists.sl_date))).fetchall()
 
     session.close()
     csv_data = f'{";".join([item.get("label") for item in SICKLIST_FIELDS])}\n'
@@ -231,7 +231,7 @@ def sick_lists():
             s = s.filter(Patients.patient_sur_name.like(f"{patient}%"))
         if select_date is not None and select_date != '':
             s = s.filter(SickLists.sl_date == select_date)
-        res = session.execute(s).fetchall()
+        res = session.execute(s.order_by(desc(SickLists.sl_date))).fetchall()
         total_rows = len(res)
         if cur_page is not None and per_page is not None:
             res = res[(cur_page - 1) * per_page: cur_page * per_page]
@@ -251,7 +251,7 @@ def sick_lists():
             value = data.get(f'{SickLists.__tablename__}_{key}')
             if value:
                 record.update({key: value})
-        record.update(sl_date=datetime.strptime(record.get('sl_date'), "%Y-%m-%d").date())
+        record.update(sl_date=datetime.strptime(record.get('sl_date'), date_format).date())
         record.pop('id')
         session.add(SickLists(**record))
         session.commit()

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, ForeignKey, inspect
+from sqlalchemy import create_engine, Column, ForeignKey, inspect, desc
 from sqlalchemy.dialects.sqlite import INTEGER, VARCHAR, DATE, SMALLINT
 from sqlalchemy.ext.declarative import declarative_base, as_declarative
 from sqlalchemy.orm import sessionmaker
