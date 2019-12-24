@@ -6,8 +6,8 @@
 
 
     <div>
-      <b-navbar toggleable="lg" type="dark" variant="info">
-        <b-navbar-brand href="/main" to="/main">Главная</b-navbar-brand>
+      <b-navbar toggleable="lg" type="dark" variant="info" >
+        <b-navbar-brand href="/main" to="/main" >Главная</b-navbar-brand>
 
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
@@ -72,9 +72,10 @@
     }
 </script>
 
-<style>
-  #app {
-    max-height: 100vh;
-    max-width: 100vw;
-  }
-</style>
+<!--<style>-->
+<!--  #app {-->
+<!--    max-height: 100vh;-->
+<!--    max-width: 100vw;-->
+<!--  }-->
+
+<!--</style>-->

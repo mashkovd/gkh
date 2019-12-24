@@ -45,7 +45,6 @@
             next() {
                 axios.get('/api/consultants')
                     .then(response => {
-                    debugger;
                         this.items = response.data.items
                         this.fields = response.data.fields
                     })

@@ -45,7 +45,7 @@
             next() {
                 axios.get('/api/departments')
                     .then(response => {
-                    debugger;
+
                         this.items = response.data.items
                         this.fields = response.data.fields
                     })
@@ -57,10 +57,3 @@
     }
 
 </script>
-
-<style>
-  #sick_list_table {
-
-
-  }
-</style>

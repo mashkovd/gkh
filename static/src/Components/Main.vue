@@ -1,8 +1,8 @@
 <template>
 
-          <ul>
-      <li v-for="l in items">{{ l }}</li>
-    </ul>
+     <div class="main_text">
+       Больничные листы
+     </div>
 
 </template>
 
@@ -16,17 +16,17 @@
                 items: []
             }
         },
-        created() {
-            axios.get("/api/consultants").then(r => {
-                this.items = r.data.items
-            })
-        }
+
     }
 </script>
 
 <style scoped>
   p {
     margin: 100px;
+  }
+  .main_text {
+    padding: 50px;
+    text-align: center;
   }
 
 </style>

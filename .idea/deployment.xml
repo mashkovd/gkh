@@ -1,11 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData">
+  <component name="PublishConfigData" showNewOnSourceInSync="false">
     <serverData>
-      <paths name="Copy of project-level server 'mashkovd'">
+      <paths name="base">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$/static/node_modules" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="bogdan">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$/static/node_modules" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="dmitry">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$/static/node_modules" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="frappe-services">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/" local="$PROJECT_DIR$/static/node_modules" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="gkh">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/var/www/gkh" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="gkh-test">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/var/www/gkh" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="huawei">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$/static/node_modules" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="mashkovd">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$/static/node_modules" web="/" />
           </mappings>
         </serverdata>
       </paths>
@@ -13,6 +67,30 @@
         <serverdata>
           <mappings>
             <mapping deploy="/" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="scaleway-frappe-dev">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$/static/node_modules" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="services-home">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$/static/node_modules" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="test">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$/static/node_modules" web="/" />
           </mappings>
         </serverdata>
       </paths>

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, ForeignKey, inspect
+from sqlalchemy import create_engine, Column, ForeignKey, inspect, desc
 from sqlalchemy.dialects.sqlite import INTEGER, VARCHAR, DATE, SMALLINT
 from sqlalchemy.ext.declarative import declarative_base, as_declarative
 from sqlalchemy.orm import sessionmaker
@@ -15,7 +15,7 @@ class Consultants(Base):
 
 class Patients(Base):
     __tablename__ = 'patients'
-    id = Column(INTEGER, primary_key=True)
+    id = Column(INTEGER, primary_key=True, autoincrement=True)
     patient_first_name = Column(VARCHAR)
     patient_sur_name = Column(VARCHAR)
     patient_age = Column(INTEGER)
@@ -41,8 +41,8 @@ class Reasons(Base):
 
 class SickLists(Base):
     __tablename__ = 'sick_lists'
-    id = Column(INTEGER, primary_key=True)
-    sl_date = Column(DATE, key='Дата')
+    id = Column(INTEGER, primary_key=True, autoincrement=True)
+    sl_date = Column(DATE)
     consultant_id = Column(ForeignKey("consultants.id"))
     number_of_sl = Column(INTEGER)
     number_of_consultation = Column(SMALLINT)
